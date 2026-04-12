@@ -238,6 +238,9 @@ The Streamlit app (app\_mysql.py) provides 6 interactive tabs connected directly
 
 The Superset dashboard connects to MySQL and provides an enterprise BI interface for non-technical stakeholders. It uses the 6 pre-built views as datasets, 13 charts, and 6 cross-chart filters.
 
+![BI - Dashboard view](Apache_Superset_Dashboard.jpg)
+
+
 # **9\. Key Findings**
 
 ## **Finding 1 — Income is the Single Strongest Predictor of Both Spend and Campaign Response**

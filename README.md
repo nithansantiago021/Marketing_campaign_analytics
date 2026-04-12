@@ -37,6 +37,7 @@ marketing_analytics/
 │   ├── app.py                         # Streamlit Dashboard
 │   └── .env                           # Database Credentials (Local only)
 ├── 4) Outputs & Project Report/
+│   ├── Apache_Superset_Dashboard.jpg  # BI - Dashboard view
 │   ├── PROJECT_REPORT.pdf             # Detailed summary report pdf version
 │   ├── PROJECT_REPORT.md              # Detailed summary report md version
 │   └── marketing_clean.csv            # Cleaned CSV for MySQL Import
