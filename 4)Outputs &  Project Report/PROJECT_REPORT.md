@@ -1,6 +1,6 @@
 **Marketing Campaign Analytics**
 
-Project Report — Version 2
+Project Report
 
 | Attribute | Value |
 | :---- | :---- |
@@ -236,7 +236,7 @@ The Streamlit app (app\_mysql.py) provides 6 interactive tabs connected directly
 
 ## **8.2 Apache Superset Dashboard**
 
-The Superset dashboard connects to MySQL and provides an enterprise BI interface for non-technical stakeholders. It uses the 6 pre-built views as datasets, 13 charts, and 6 cross-chart filters.
+The Superset dashboard connects to MySQL and provides an enterprise BI interface. It uses 5 datasets — the main customers table and 4 pre-built analytical views (v_campaign_kpis, v_segment_kpis, v_product_spend_by_segment, v_channel_by_segment, v_country_summary) — to power 11 charts across 4 Big Number KPIs, 2 segment charts, 1 KPI summary table, 2 channel/product breakdowns, and 2 geographic comparisons.
 
 ![BI - Dashboard view](Apache_Superset_Dashboard.jpg)
 
