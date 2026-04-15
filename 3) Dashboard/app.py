@@ -2,7 +2,7 @@
 Marketing Campaign Analytics Dashboard
 Streamlit App — MySQL version (app_mysql.py)
 
-Run: streamlit run app_mysql.py
+Run: streamlit run app.py
 
 Prerequisites:
     pip install streamlit plotly pandas sqlalchemy pymysql anthropic
@@ -65,7 +65,6 @@ except ImportError:
 # ─── Page config ───────────────────────────────────────────
 st.set_page_config(
     page_title="Marketing Campaign Analytics",
-    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -102,7 +101,7 @@ def load_data():
         df = pd.read_sql("SELECT * FROM customers", con=_engine)
     except Exception as e:
         st.error(
-            f"❌ Could not connect to MySQL.\n\n"
+            f"Could not connect to MySQL.\n\n"
             f"Error: {e}\n\n"
             f"Make sure you have:\n"
             f"1. Run `01_eda_cleaning_segmentation_mysql.py` to populate the DB.\n"
@@ -144,7 +143,7 @@ selected_income_band = st.sidebar.selectbox("Income Band", ib_opts)
 selected_segment     = make_filter("Segment", "Primary_Segment")
 
 st.sidebar.markdown("---")
-st.sidebar.caption("📡 Connected to MySQL")
+st.sidebar.caption("Connected to MySQL")
 st.sidebar.caption(f"`{MYSQL_HOST}/{MYSQL_DATABASE}`")
 
 # Apply filters
@@ -157,41 +156,44 @@ if selected_income_band  != "All": df = df[df["Income_Band"]    == selected_inco
 if selected_segment      != "All": df = df[df["Primary_Segment"]== selected_segment]
 
 # ─── Header ────────────────────────────────────────────────
-st.title("📊 Marketing Campaign Analytics Dashboard")
+st.title("Marketing Campaign Analytics Dashboard")
 st.markdown(f"Showing **{len(df):,}** customers (filtered from {len(df_full):,} total)")
 st.markdown("---")
 
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-    "🏠 Overview", "🎯 Campaign Analysis", "💰 Spending Patterns",
-    "📡 Channel Analysis", "👥 Customer Segments", "🤖 AI Data Explorer"
+    "Demographic Overview", "Campaign Analysis", "Spending Patterns",
+    "Channel Analysis", "Customer Segments", "AI Data Explorer"
 ])
 
 # ══════════════════════════════════════════════════════════
-# TAB 1: OVERVIEW
+# TAB 1: DEMOGRAPHIC OVERVIEW
 # ══════════════════════════════════════════════════════════
 with tab1:
-    st.markdown("### 📈 Key Performance Indicators")
+    st.markdown("### Key Performance Indicators")
     col1, col2, col3, col4, col5 = st.columns(5)
     with col1: st.metric("Total Customers",  f"{len(df):,}")
-    with col2: st.metric("Avg Income",       f"${df['Income'].mean():,.0f}")
-    with col3: st.metric("Avg Total Spend",  f"${df['Total_Spend'].mean():,.0f}")
-    with col4: st.metric("Response Rate",    f"{df['Response'].mean()*100:.1f}%")
+    with col2: st.metric("Avg Income",       f"{df['Income'].mean():,.0f}")
+    with col3: st.metric("Avg Total Spend",  f"{df['Total_Spend'].mean():,.0f}")
+    with col4: st.metric("Response Rate (latest)",    f"{df['Response'].mean()*100:.1f}%")
     with col5: st.metric("Avg Age",          f"{df['Age'].mean():.0f} yrs")
 
     st.markdown("---")
     col_l, col_r = st.columns(2)
 
     with col_l:
-        st.markdown('<div class="section-title">Customer Segments Distribution</div>', unsafe_allow_html=True)
-        seg_counts = df["Primary_Segment"].value_counts().reset_index()
-        seg_counts.columns = ["Segment", "Count"]
+        st.markdown('<div class="section-title">Age Band Distribution</div>', unsafe_allow_html=True)
+        inc_counts = df["Age_Band"].value_counts().reset_index()
+        inc_counts.columns = ["Age Band", "Count"]
+        inc_counts["Age Band"] = pd.Categorical(inc_counts["Age Band"],
+                                                   categories=age_band_order, ordered=True)
+        inc_counts = inc_counts.sort_values("Age Band")
         if PLOTLY:
-            fig = px.pie(seg_counts, values="Count", names="Segment",
-                         color_discrete_sequence=px.colors.qualitative.Set3, hole=0.4)
-            fig.update_layout(margin=dict(t=10, b=10))
+            fig = px.bar(inc_counts, x="Age Band", y="Count",
+                         color="Count", color_continuous_scale="Greens")
+            fig.update_layout(margin=dict(t=10, b=10), coloraxis_showscale=False)
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.bar_chart(seg_counts.set_index("Segment"))
+            st.bar_chart(inc_counts.set_index("Age Band"))
 
     with col_r:
         st.markdown('<div class="section-title">Income Band Distribution</div>', unsafe_allow_html=True)
@@ -219,8 +221,8 @@ with tab1:
             Avg_Spend=("Total_Spend","mean"),
             Response_Rate=("Response","mean")
         ).reset_index()
-        t["Avg_Income"]    = t["Avg_Income"].map("${:,.0f}".format)
-        t["Avg_Spend"]     = t["Avg_Spend"].map("${:,.0f}".format)
+        t["Avg_Income"]    = t["Avg_Income"].map("{:,.0f}".format)
+        t["Avg_Spend"]     = t["Avg_Spend"].map("{:,.0f}".format)
         t["Response_Rate"] = (t["Response_Rate"]*100).map("{:.1f}%".format)
         return t
 
@@ -233,7 +235,7 @@ with tab1:
 # TAB 2: CAMPAIGN ANALYSIS
 # ══════════════════════════════════════════════════════════
 with tab2:
-    st.markdown("### 🎯 Campaign Performance")
+    st.markdown("### Campaign Performance")
 
     campaigns = {
         "Campaign 1": "AcceptedCmp1", "Campaign 2": "AcceptedCmp2",
@@ -318,7 +320,7 @@ with tab2:
 # TAB 3: SPENDING PATTERNS
 # ══════════════════════════════════════════════════════════
 with tab3:
-    st.markdown("### 💰 Spending Patterns")
+    st.markdown("### Spending Patterns")
 
     product_cols = {
         "Wines": "MntWines", "Fruits": "MntFruits", "Meat": "MntMeatProducts",
@@ -330,11 +332,11 @@ with tab3:
         st.markdown('<div class="section-title">Avg Spend by Product Category</div>', unsafe_allow_html=True)
         cat_spend = pd.DataFrame({
             "Category": list(product_cols.keys()),
-            "Avg Spend ($)": [df[v].mean() for v in product_cols.values()]
-        }).sort_values("Avg Spend ($)", ascending=False)
+            "Avg Spend": [df[v].mean() for v in product_cols.values()]
+        }).sort_values("Avg Spend", ascending=False)
         if PLOTLY:
-            fig = px.bar(cat_spend, x="Category", y="Avg Spend ($)",
-                         color="Avg Spend ($)", color_continuous_scale="Oranges")
+            fig = px.bar(cat_spend, x="Category", y="Avg Spend",
+                         color="Avg Spend", color_continuous_scale="Oranges")
             fig.update_layout(coloraxis_showscale=False)
             st.plotly_chart(fig, use_container_width=True)
         else:
@@ -351,29 +353,58 @@ with tab3:
 
     st.markdown("---")
     st.markdown('<div class="section-title">Avg Spend by Product — by Age Band</div>', unsafe_allow_html=True)
-    age_prod = df.groupby("Age_Band")[[v for v in product_cols.values()]].mean().round(0).reset_index()
-    age_prod.columns = ["Age Band"] + list(product_cols.keys())
-    age_prod["Age Band"] = pd.Categorical(age_prod["Age Band"],
-                                           categories=age_band_order, ordered=True)
-    age_prod = age_prod.sort_values("Age Band")
+
+    raw_product_columns = list(product_cols.values())
+
+    age_prod = df.melt(
+        id_vars="Age_Band", 
+        value_vars=raw_product_columns, 
+        var_name="Product", 
+        value_name="Spend"
+    )
+
+    age_prod['Product'] = (age_prod['Product']
+                            .str.replace('Mnt', '', regex=False)
+                            .str.replace('Products', '', regex=False)
+                            .str.replace('Prods', '', regex=False))
+
+    agg = age_prod.groupby(["Age_Band", "Product"])["Spend"].mean().reset_index()
+
+    age_order = ["18-29", "30-39", "40-49", "50-59", "60-69", "70+"]
+    agg["Age_Band"] = pd.Categorical(agg["Age_Band"], categories=age_order, ordered=True)
+    agg = agg.sort_values("Age_Band")
+    product_color_map = {
+        "Wines": "#19D3F3",
+        "Fruits": "#EF553B",
+        "Meat": "#AB63FA",
+        "Fish": "#636EFA",
+        "Sweets": "#FFA15A",
+        "Gold": "#00CC96"
+    }
     if PLOTLY:
         fig = px.bar(
-            age_prod.melt(id_vars="Age Band", var_name="Category", value_name="Avg Spend"),
-            x="Age Band", y="Avg Spend", color="Category", barmode="group"
+            agg, 
+            x="Age_Band", 
+            y="Spend", 
+            color="Product", 
+            barmode="group",
+            title="Average Product Spend by Age Band",
+            category_orders={'Age_Band': age_order},
+            color_discrete_map=product_color_map
         )
         st.plotly_chart(fig, use_container_width=True)
     else:
-        st.dataframe(age_prod)
+        st.dataframe(agg.pivot(index="Age_Band", columns="Product", values="Spend").round(0))
 
     st.markdown("---")
     col_c, col_d = st.columns(2)
     with col_c:
         st.markdown('<div class="section-title">Avg Total Spend by Education</div>', unsafe_allow_html=True)
         edu_sp = df.groupby("Education")["Total_Spend"].mean().sort_values(ascending=False).reset_index()
-        edu_sp.columns = ["Education", "Avg Total Spend ($)"]
+        edu_sp.columns = ["Education", "Avg Total Spend ()"]
         if PLOTLY:
-            fig = px.bar(edu_sp, x="Education", y="Avg Total Spend ($)",
-                         color="Avg Total Spend ($)", color_continuous_scale="Teal")
+            fig = px.bar(edu_sp, x="Education", y="Avg Total Spend ()",
+                         color="Avg Total Spend ()", color_continuous_scale="Teal")
             fig.update_layout(coloraxis_showscale=False)
             st.plotly_chart(fig, use_container_width=True)
         else:
@@ -381,30 +412,69 @@ with tab3:
     with col_d:
         st.markdown('<div class="section-title">Avg Total Spend by Country</div>', unsafe_allow_html=True)
         ctry_sp = df.groupby("Country")["Total_Spend"].mean().sort_values(ascending=False).reset_index()
-        ctry_sp.columns = ["Country", "Avg Total Spend ($)"]
+        ctry_sp.columns = ["Country", "Avg Total Spend ()"]
         if PLOTLY:
-            fig = px.bar(ctry_sp, x="Country", y="Avg Total Spend ($)",
-                         color="Avg Total Spend ($)", color_continuous_scale="Purples")
+            fig = px.bar(ctry_sp, x="Country", y="Avg Total Spend ()",
+                         color="Avg Total Spend ()", color_continuous_scale="Purples")
             fig.update_layout(coloraxis_showscale=False)
             st.plotly_chart(fig, use_container_width=True)
         else:
             st.bar_chart(ctry_sp.set_index("Country"))
 
     st.markdown("---")
-    st.markdown('<div class="section-title">Income vs Total Spend (Scatter)</div>', unsafe_allow_html=True)
-    sample = df.sample(min(3000, len(df)), random_state=42)
+    st.markdown('<div class="section-title">Revenue Contribution by Product Category</div>', unsafe_allow_html=True)
+    
+    # 1. Prepare the data (Aggregation)
+    # Using the same cleaning logic as your other charts
+    contribution = df[raw_product_columns].sum().reset_index()
+    contribution.columns = ["Product", "Total_Spend"]
+    contribution['Product_Label'] = (contribution['Product']
+                                     .str.replace('Mnt', '', regex=False)
+                                     .str.replace('Products', '', regex=False)
+                                     .str.replace('Prods', '', regex=False))
+
+    # 2. Define the Color Map (Shared across your dashboard)
+    product_color_map = {
+        "Wines": "#19D3F3",
+        "Fruits": "#EF553B",
+        "Meat": "#AB63FA",
+        "Fish": "#636EFA",
+        "Sweets": "#FFA15A",
+        "Gold": "#00CC96"
+    }
+
     if PLOTLY:
-        fig = px.scatter(sample, x="Income", y="Total_Spend", color="Primary_Segment",
-                         opacity=0.5, hover_data=["Age","Education","Country"])
+        # 3. Create the Pie Chart
+        fig = px.pie(
+            contribution,
+            names='Product_Label',
+            values='Total_Spend',
+            color='Product_Label',
+            color_discrete_map=product_color_map # Ensures color consistency
+        )
+
+        fig.update_traces(
+            textinfo='label+percent',
+            textfont_size=12,
+            # Slight separation for visibility as in your EDA
+            pull=[0.05] * len(contribution) 
+        )
+
+        fig.update_layout(
+            height=500,
+            margin=dict(t=0, b=0, l=0, r=0) # Removes excess white space in Streamlit
+        )
+        
         st.plotly_chart(fig, use_container_width=True)
     else:
-        st.scatter_chart(sample[["Income","Total_Spend"]])
+        # Static fallback table if PLOTLY is False
+        st.dataframe(contribution[["Product_Label", "Total_Spend"]].set_index("Product_Label"))
 
 # ══════════════════════════════════════════════════════════
 # TAB 4: CHANNEL ANALYSIS
 # ══════════════════════════════════════════════════════════
 with tab4:
-    st.markdown("### 📡 Channel Analysis")
+    st.markdown("### Channel Analysis")
 
     channels = {
         "Web Purchases":     "NumWebPurchases",
@@ -479,7 +549,7 @@ with tab4:
             (df["Response"] == 0)
         ]
         st.metric("Under-served Count",   f"{len(under):,}")
-        st.metric("Their Avg Income",     f"${under['Income'].mean():,.0f}")
+        st.metric("Their Avg Income",     f"{under['Income'].mean():,.0f}")
         st.metric("Their Avg Age",        f"{under['Age'].mean():.0f} yrs")
         st.metric("Their Avg Web Visits", f"{under['NumWebVisitsMonth'].mean():.1f}")
         edu_u = under["Education"].value_counts().head(3).reset_index()
@@ -491,7 +561,7 @@ with tab4:
 # TAB 5: CUSTOMER SEGMENTS
 # ══════════════════════════════════════════════════════════
 with tab5:
-    st.markdown("### 👥 Customer Segment Deep-Dive")
+    st.markdown("### Customer Segment Deep-Dive")
 
     seg_summary = df.groupby("Primary_Segment").agg(
         Customers=("ID","count"),
@@ -547,7 +617,7 @@ with tab5:
             st.dataframe(df.groupby("Primary_Segment")["Income"].describe())
 
     st.markdown("---")
-    st.markdown('<div class="section-title">🎯 Ideal Target Customer Profile</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title"> Ideal Target Customer Profile</div>', unsafe_allow_html=True)
     st.info("High income (>75K) + any campaign accepted + above-median spend")
     ideal = df[
         (df["Income"] > 75000) &
@@ -558,8 +628,8 @@ with tab5:
         col_i1, col_i2, col_i3, col_i4 = st.columns(4)
         with col_i1: st.metric("Count",       f"{len(ideal):,}")
         with col_i2: st.metric("Avg Age",     f"{ideal['Age'].mean():.0f}")
-        with col_i3: st.metric("Avg Income",  f"${ideal['Income'].mean():,.0f}")
-        with col_i4: st.metric("Avg Spend",   f"${ideal['Total_Spend'].mean():,.0f}")
+        with col_i3: st.metric("Avg Income",  f"{ideal['Income'].mean():,.0f}")
+        with col_i4: st.metric("Avg Spend",   f"{ideal['Total_Spend'].mean():,.0f}")
         ideal_profile = ideal.groupby(["Age_Band","Education"]).agg(
             Count=("ID","count"),
             Avg_Spend=("Total_Spend","mean"),
@@ -576,10 +646,10 @@ with tab5:
 # TAB 6: AI DATA EXPLORER
 # ══════════════════════════════════════════════════════════
 with tab6:
-    st.markdown("### 🤖 AI Data Explorer")
+    st.markdown("###  AI Data Explorer")
     st.markdown(
-        "Type any question in plain English. Claude will generate a query, "
-        "run it against your filtered data, and show you the result as a table or chart."
+        "Type any question in plain English. AI will generate a query, "
+        "run it, and show you the result as a table or chart."
     )
 
     # ── Schema context sent to Claude ──────────────────────
@@ -751,7 +821,7 @@ Dataset schema:
 
         # ── Parse JSON from any provider's response ────────────
         raw = re.sub(r"^```(?:json)?\s*", "", raw)
-        raw = re.sub(r"\s*```$", "",         raw)
+        raw = re.sub(r"\s*```", "",         raw)
         # Some models wrap in extra text — extract first {...} block
         match = re.search(r"\{.*\}", raw, re.DOTALL)
         if match:
@@ -809,16 +879,11 @@ Dataset schema:
         st.session_state.ai_history = []   # list of {"role","content","result","parsed"}
 
     # ── Example prompts ─────────────────────────────────────
-    st.markdown("**💡 Try these examples:**")
+    st.markdown("**Try these examples:**")
     examples = [
         "Show average total spend by country, sorted highest to lowest",
         "What is the response rate for each education level?",
-        "Top 10 customers by total spend with their age, income and segment",
-        "Compare average wine and meat spend across age bands",
-        "Which marital status has the most campaign responders?",
-        "Show total purchases by channel for high income customers only",
-        "Distribution of customers across income bands and segments",
-        "Which country has the highest web visit rate?",
+        "Top 10 customers by total spend with their age, income and segment"
     ]
     cols = st.columns(4)
     for i, ex in enumerate(examples):
@@ -874,7 +939,7 @@ Dataset schema:
                 # Download button for every result
                 csv_bytes = turn["result"].to_csv(index=False).encode()
                 st.download_button(
-                    label="⬇️ Download as CSV",
+                    label="Download as CSV",
                     data=csv_bytes,
                     file_name="ai_query_result.csv",
                     mime="text/csv",
@@ -884,7 +949,7 @@ Dataset schema:
     # ── Clear history button ────────────────────────────────
     if st.session_state.ai_history:
         st.markdown("---")
-        if st.button("🗑️ Clear conversation", type="secondary"):
+        if st.button("Clear conversation", type="secondary"):
             st.session_state.ai_history = []
             st.rerun()
 
@@ -900,7 +965,7 @@ Dataset schema:
         }
         var, url, pkg = provider_links[AI_PROVIDER]
         st.warning(
-            f"⚠️ **{var} is not set.**\n\n"
+            f"**{var} is not set.**\n\n"
             f"1. Get a free key at [{url}](https://{url})\n"
             f"2. Install the package: `{pkg}`\n"
             f"3. Paste the key at the top of `app_mysql.py`:\n"
@@ -910,6 +975,6 @@ Dataset schema:
         )
     if AI_PROVIDER == "ollama":
         st.info(
-            "🖥️ **Using Ollama (local).** Make sure Ollama is running:\n"
+            " **Using Ollama (local).** Make sure Ollama is running:\n"
             f"```\nollama serve\nollama pull {OLLAMA_MODEL}\n```"
         )
