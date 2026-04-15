@@ -223,13 +223,13 @@ A single denormalised fact table (customers) holds all 45 columns. This design i
 
 ## **8.1 Streamlit Dashboard**
 
-The Streamlit app (app\_mysql.py) provides 6 interactive tabs connected directly to MySQL via SQLAlchemy. A sidebar with 6 filters (Country, Education, Marital Status, Age Band, Income Band, Segment) applies dynamically to all charts simultaneously.
+The Streamlit app (app.py) provides 6 interactive tabs connected directly to MySQL via SQLAlchemy. A sidebar with 6 filters (Country, Education, Marital Status, Age Band, Income Band, Segment) applies dynamically to all charts simultaneously.
 
 | Tab | Key Visuals |
 | :---- | :---- |
-| Overview | 5 KPI metric cards, segment pie chart, income band bar, education and marital summary tables |
+| Overview | 5 KPI metric cards, age band bar, income band bar, education and marital summary tables |
 | Campaign Analysis | Campaign response rate bar chart, segment response rate bar, income and age band line charts, multi-campaign acceptance table |
-| Spending Patterns | Product category bar chart, box plots, age × product grouped bar, income vs spend scatter |
+| Spending Patterns | Product category bar chart, box plots, age × product grouped bar, revenue contribution |
 | Channel Analysis | Channel averages bar, high vs low spender comparison, web visits vs spend scatter, under-served segment profile |
 | Customer Segments | Segment KPI table, radar chart (normalised KPIs), age and income box plots, ideal target profile |
 | AI Data Explorer | Natural language prompt bar — Ollama/Groq generates pandas code → runs on filtered data → returns table or chart |

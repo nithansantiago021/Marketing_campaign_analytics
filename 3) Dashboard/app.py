@@ -122,7 +122,7 @@ def load_csv_fallback():
 df_full = load_data()
 
 # ─── Sidebar filters ───────────────────────────────────────
-st.sidebar.title("🔎 Filters")
+st.sidebar.title("Filters")
 st.sidebar.markdown("---")
 
 def make_filter(label, col):
@@ -157,7 +157,7 @@ if selected_segment      != "All": df = df[df["Primary_Segment"]== selected_segm
 
 # ─── Header ────────────────────────────────────────────────
 st.title("Marketing Campaign Analytics Dashboard")
-st.markdown(f"Showing **{len(df):,}** customers (filtered from {len(df_full):,} total)")
+st.markdown(f"Showing **{len(df):,}** customers (filtered from 56,000 total)")
 st.markdown("---")
 
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
