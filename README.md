@@ -71,7 +71,7 @@ pip install pandas sqlalchemy pymysql streamlit plotly python-dotenv
 cd app
 streamlit run app.py
 ```
-![Dashboard_app.py](4)Outputs &  Project Report/app.jpeg)
+![Dashboard](Assets/app.jpeg)
 
 ### 4. Connect Apache Superset
 1.  Point Superset to your MySQL URI: `mysql://user:pass@localhost/marketing_analytics`.
