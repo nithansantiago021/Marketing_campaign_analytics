@@ -17,7 +17,7 @@ This project transforms raw marketing data into actionable business intelligence
 * **Database:** MySQL 8.0 (Relational Storage & Views)
 * **Web App:** Streamlit (Dashboard + LLM Integration)
 * **BI Tool:** Apache Superset
-* **AI/LLM:** Ollama (Local) or Groq API (Cloud)
+* **AI/LLM:** Groq API (Cloud)
 
 ---
 
@@ -71,6 +71,7 @@ pip install pandas sqlalchemy pymysql streamlit plotly python-dotenv
 cd app
 streamlit run app.py
 ```
+![Dashboard_app.py](4)Outputs &  Project Report/app.jpeg)
 
 ### 4. Connect Apache Superset
 1.  Point Superset to your MySQL URI: `mysql://user:pass@localhost/marketing_analytics`.

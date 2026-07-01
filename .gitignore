@@ -13,8 +13,9 @@ venv/
 # *.sql
 *.db
 # *.csv
-# *.json
+*.json
 
 # OS specific (especially for Ubuntu/Mac)
 .DS_Store
 .ipynb_checkpoints/
+.vscode
